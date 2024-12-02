@@ -66,6 +66,9 @@ class ImageToASCII:
         return path
     
     def convert(self, image_path: str) -> str:
+        if not os.path.exists(self.temp_save_path):
+            os.mkdir(self.temp_save_path)
+
         with Image.open(image_path) as img:
             resize = self.resize_image(img)
             ascii_art = self.image_to_color_ascii(resize)
