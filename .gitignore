@@ -2,3 +2,6 @@
 /source
 /output
 /font
+/temp
+/tmp
+/__pycache__

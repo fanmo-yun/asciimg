@@ -7,6 +7,9 @@ import datetime, os
 class ImageToASCII:
     def __init__(self) -> None:
         self.ascii_chars = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`\'. "
+        self.font_path = os.path.join("font", "JETBRAINSMONO-REGULAR.TTF")
+        self.temp_save_path = "temp/"
+        self.font_size = 16
 
     def resize_image(self, image: ImageFile, output_width=150) -> Image:
         width_ratio = output_width / image.width
@@ -36,10 +39,8 @@ class ImageToASCII:
         
         return chars
     
-    def save_img(self, ascii_art: LiteralString, save_path: str):
-        font_path = "font\\JETBRAINSMONO-REGULAR.TTF"
-        font_size = 16
-        font = ImageFont.truetype(font_path, font_size)
+    def save_img(self, ascii_art: list, save_path: str) -> str:
+        font = ImageFont.truetype(self.font_path, self.font_size)
 
         char_width, char_height = font.getbbox("A")[2], font.getbbox("A")[3]
         max_width = max(len(line) for line in ascii_art)
@@ -62,13 +63,10 @@ class ImageToASCII:
         filename = str(int(datetime.datetime.now().timestamp())) + ".png"
         path = os.path.join(save_path, filename)
         img.save(path)
+        return path
     
-    def convert(self, image_path: str, save_path: str):
+    def convert(self, image_path: str) -> str:
         with Image.open(image_path) as img:
             resize = self.resize_image(img)
             ascii_art = self.image_to_color_ascii(resize)
-            self.save_img(ascii_art, save_path)
-
-if __name__ == "__main__":
-    ita = ImageToASCII()
-    ita.convert("source\\1287503.jpg", "output")
+            return self.save_img(ascii_art, self.temp_save_path)
