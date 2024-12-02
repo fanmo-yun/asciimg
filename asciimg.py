@@ -12,21 +12,6 @@ class ImageToASCII:
         width_ratio = output_width / image.width
         height = int(image.height * width_ratio * 0.5)
         return image.resize((output_width, height))
-    
-    def image_to_ascii(self, image: ImageFile) -> list:
-        grayscale_image = image.convert('L')
-        image_array = np.array(grayscale_image)
-        normalized = (image_array - image_array.min()) / (image_array.max() - image_array.min())
-
-        chars = []
-        for row in normalized:
-            ascii_row = []
-            for pixel in row:
-                char_index = int(pixel * (len(self.ascii_chars) - 1))
-                ascii_row.append(self.ascii_chars[char_index])
-            chars.append(''.join(ascii_row))
-        
-        return '\n'.join(chars)
 
     def image_to_color_ascii(self, image: ImageFile):
         rgb_image = image.convert('RGB')
@@ -77,15 +62,13 @@ class ImageToASCII:
         filename = str(int(datetime.datetime.now().timestamp())) + ".png"
         path = os.path.join(save_path, filename)
         img.save(path)
-        print(f"图片已保存到：{path}")
     
-    def convert(self, image_path: str):
+    def convert(self, image_path: str, save_path: str):
         with Image.open(image_path) as img:
             resize = self.resize_image(img)
-            # print(self.image_to_ascii(resize))
             ascii_art = self.image_to_color_ascii(resize)
-            self.save_img(ascii_art, "output")
+            self.save_img(ascii_art, save_path)
 
 if __name__ == "__main__":
     ita = ImageToASCII()
-    ita.convert("source\\1287503.jpg")
+    ita.convert("source\\1287503.jpg", "output")
