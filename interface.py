@@ -13,6 +13,8 @@ class interface(ctk.CTk):
         self.height = 600
         self.canvas_w = self.width - 20
         self.canvas_h = self.height - 150
+        self.button_w = 120
+        self.button_h = 80
         self.font = ctk.CTkFont(family="Microsoft YaHei", size=16, weight="normal")
         self.display_center()
         self.title("Ascii Art")
@@ -34,9 +36,9 @@ class interface(ctk.CTk):
 
     def layout(self) -> None:
         self.image_canvas = ctk.CTkCanvas(master=self, width=self.canvas_w, height=self.canvas_h, background="grey", highlightthickness=1, highlightbackground="grey")
-        self.open_button = ctk.CTkButton(master=self, width=120, height=80, text="打开文件", font=self.font, command=self.open_img)
-        self.convert_button = ctk.CTkButton(master=self, width=120, height=80, text="转换", font=self.font, command=self.process_img)
-        self.save_button = ctk.CTkButton(master=self, width=120, height=80, text="保存文件", font=self.font, command=self.output_img)
+        self.open_button = ctk.CTkButton(master=self, width=self.button_w, height=self.button_h, text="打开文件", font=self.font, command=self.open_img)
+        self.convert_button = ctk.CTkButton(master=self, width=self.button_w, height=self.button_h, text="转换", font=self.font, command=self.process_img)
+        self.save_button = ctk.CTkButton(master=self, width=self.button_w, height=self.button_h, text="保存文件", font=self.font, command=self.output_img)
 
     def layup(self) -> None:
         self.image_canvas.place(anchor="nw", x=10, y=10)
@@ -63,6 +65,10 @@ class interface(ctk.CTk):
             return
         
         if self.temp_image is not None:
+            if not os.path.exists(self.temp_image):
+                showerror(title="导出错误", message="图片导出出现问题, 请重试!")
+                return
+
             shutil.copy(self.temp_image, save_path)
             self.image_canvas.delete(ctk.ALL)
             self.image_canvas = None
