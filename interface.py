@@ -1,5 +1,5 @@
 import customtkinter as ctk
-from tkinter.messagebox import showerror
+from tkinter.messagebox import showerror, showinfo
 from tkinter.filedialog import askopenfilename, asksaveasfilename
 import asciimg, os, shutil
 from PIL import Image, ImageTk
@@ -48,31 +48,36 @@ class interface(ctk.CTk):
     
     def open_img(self):
         self.open_path = askopenfilename(title="打开图片", filetypes=[("image", "*.jpg *.png *.jpeg *.JPG *.PNG *.JPEG")])
-        self.update_canvas(self.open_path)
+        if len(self.open_path) != 0 and self.open_path is not None:
+            self.update_canvas(self.open_path)
 
     def process_img(self):
-        if self.open_path is not None:
+        if self.open_path is not None and len(self.open_path) != 0:
             self.temp_image = self.ita.convert(self.open_path)
             self.update_canvas(self.temp_image)
             self.open_path = None
 
     def output_img(self):
+        if self.temp_image is None:
+            showerror(title="导出错误", message="图片导出出现问题, 请重试!")
+            return
+
         save_path = asksaveasfilename(title="保存图片", filetypes=[("image", "*.png")])
 
         if len(os.path.splitext(save_path)[1]) == 0: return
         if os.path.splitext(save_path)[1] != ".png":
-            showerror(title="错误", message="文件后缀必须为<.png>")
+            showerror(title="后缀错误", message="文件后缀必须为<.png>")
             return
-        
-        if self.temp_image is not None:
-            if not os.path.exists(self.temp_image):
-                showerror(title="导出错误", message="图片导出出现问题, 请重试!")
-                return
 
+        if os.path.exists(self.temp_image):
             shutil.copy(self.temp_image, save_path)
-            self.image_canvas.delete(ctk.ALL)
-            self.image_canvas = None
-            self.temp_image = None
+            showinfo(title="复制完成", message="文件导出成功")
+        else:
+            showerror(title="复制错误", message="文件复制错误")
+        
+        self.image_canvas.delete(ctk.ALL)
+        self.image_canvas = None
+        self.temp_image = None
     
     def update_canvas(self, path: str):
         self.canvas_img = ImageTk.PhotoImage(self.suit_img(path))
