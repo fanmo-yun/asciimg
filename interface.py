@@ -53,9 +53,11 @@ class interface(ctk.CTk):
 
     def process_img(self):
         if self.open_path is not None and len(self.open_path) != 0:
-            self.temp_image = self.ita.convert(self.open_path)
+            self.temp_image, clips = self.ita.convert(self.open_path)
             self.update_canvas(self.temp_image)
             self.open_path = None
+            self.clipboard_append(clips)
+            self.update()
 
     def output_img(self):
         if self.temp_image is None:

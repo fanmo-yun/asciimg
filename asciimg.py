@@ -15,6 +15,9 @@ class ImageToASCII:
         width_ratio = output_width / image.width
         height = int(image.height * width_ratio * 0.5)
         return image.resize((output_width, height))
+    
+    def rgb_to_ansi(self, r, g, b):
+        return f"\033[38;2;{r};{g};{b}m"
 
     def image_to_color_ascii(self, image: ImageFile):
         rgb_image = image.convert('RGB')
@@ -25,19 +28,26 @@ class ImageToASCII:
         normalized = (grayscale_array - grayscale_array.min()) / (grayscale_array.max() - grayscale_array.min())
 
         chars = []
+        clip_chars = []
         for y, row in enumerate(normalized):
             ascii_row = []
-            for x, pixel in enumerate(row):
+            clip_row = []
+            for x, _ in enumerate(row):
                 r, g, b = image_array[y, x]
-                
-                char_index = int(pixel * (len(self.ascii_chars) - 1))
+
+                pixel_gray = 0.2989 * r + 0.5870 * g + 0.1140 * b
+                pixel_normalized = pixel_gray / 255
+
+                char_index = int(pixel_normalized * (len(self.ascii_chars) - 1))
                 char = self.ascii_chars[char_index]
 
                 ascii_row.append((char, (r, g, b)))
+                clip_row.append(f"{self.rgb_to_ansi(r, g, b)}{char}\033[0m")
             
             chars.append(ascii_row)
+            clip_chars.append(''.join(clip_row))
         
-        return chars
+        return chars, '\n'.join(clip_chars)
     
     def save_img(self, ascii_art: list, save_path: str) -> str:
         font = ImageFont.truetype(self.font_path, self.font_size)
@@ -65,11 +75,11 @@ class ImageToASCII:
         img.save(path)
         return path
     
-    def convert(self, image_path: str) -> str:
+    def convert(self, image_path: str):
         if not os.path.exists(self.temp_save_path):
             os.mkdir(self.temp_save_path)
 
         with Image.open(image_path) as img:
             resize = self.resize_image(img)
-            ascii_art = self.image_to_color_ascii(resize)
-            return self.save_img(ascii_art, self.temp_save_path)
+            ascii_art, clip_ascii = self.image_to_color_ascii(resize)
+            return self.save_img(ascii_art, self.temp_save_path), clip_ascii
